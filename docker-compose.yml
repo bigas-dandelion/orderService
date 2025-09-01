@@ -57,7 +57,7 @@ services:
       - kafka
     command: >
       bash -c '
-      echo "⏳ Ожидание Kafka..." &&
+      echo "Ожидание Kafka..." &&
       cub kafka-ready -b kafka:9092 1 30 &&
       kafka-topics --create \
         --topic orders \
