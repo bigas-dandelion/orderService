@@ -9,11 +9,10 @@ import (
 )
 
 type Config struct {
-	Db          DbConfig
-	KafkaCfg    KafkaConfig
-	CacheCfg    CacheConfig
-	HTTPCfg     HTTP
-	ProducerCfg Producer
+	Db       DbConfig
+	KafkaCfg KafkaConfig
+	CacheCfg CacheConfig
+	HTTPCfg  HTTP
 }
 
 type KafkaConfig struct {
@@ -28,10 +27,6 @@ type CacheConfig struct {
 
 type HTTP struct {
 	Port string
-}
-
-type Producer struct {
-	DataPath string
 }
 
 type DbConfig struct {
@@ -60,10 +55,6 @@ func LoadConfig() *Config {
 
 		HTTPCfg: HTTP{
 			Port: getEnvOrDefault("HTTP_PORT", "8082"),
-		},
-
-		ProducerCfg: Producer{
-			DataPath: getEnvOrDefault("PRODUCER_DATA_PATH", "./data"),
 		},
 	}
 }
