@@ -20,10 +20,10 @@ run:
 	./$(BINARY)
 
 migrate-up:
-	migrate -database ${POSTGRESQL_URL} -path db/migrations up
+	migrate -database ${POSTGRESQL_URL} -path cons/db/migrations up
 
 migrate-down:
-	migrate -database ${POSTGRESQL_URL} -path db/migrations down
+	migrate -database ${POSTGRESQL_URL} -path cons/db/migrations down
 
 help:
 	@echo "Доступные команды:"
