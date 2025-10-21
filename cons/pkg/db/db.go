@@ -2,14 +2,15 @@ package db
 
 import (
 	"database/sql"
-	"l0/cons/internal/config"
+	"log"
 
 	_ "github.com/lib/pq"
 )
 
-func NewDB(cfg *config.Config) (*sql.DB, error) {
-	db, err := sql.Open("postgres", cfg.Db.Dsn)
+func NewDB(Dsn string) (*sql.DB, error) {
+	db, err := sql.Open("postgres", Dsn)
 	if err != nil {
+		log.Fatal("Подключение к БД прервано:", err)
 		return nil, err
 	}
 

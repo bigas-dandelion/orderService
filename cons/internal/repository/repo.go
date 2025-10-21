@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
+
 	"l0/cons/internal/cache"
 	"l0/cons/internal/models"
-	"log"
 )
 
 type Repository struct {
@@ -78,12 +79,12 @@ func (r *Repository) StoreOrder(order *models.Order) error {
 	}
 
 	if err = tx.Commit(); err != nil {
-		log.Println("Failed to commit transaction", "error", err)
+		log.Println("не удалось зафиксировать транзакцию", "error", err)
 		tx.Rollback()
 		return err
 	}
 
-	r.cache.Set(order.OrderUID, order)
+	r.cache.Put(order.OrderUID, order)
 
 	return nil
 }
@@ -171,7 +172,7 @@ func (r *Repository) GetOrder(orderUID string) (*models.Order, error) {
 		order.Items = append(order.Items, item)
 	}
 
-	r.cache.Set(orderUID, order)
+	r.cache.Put(orderUID, order)
 
 	return order, nil
 }
@@ -179,7 +180,7 @@ func (r *Repository) GetOrder(orderUID string) (*models.Order, error) {
 func (r *Repository) loadToCache() {
 	rows, err := r.db.Query("SELECT order_uid FROM orders")
 	if err != nil {
-		log.Printf("не удалось получить все order : %v", err)
+		log.Printf("Не удалось получить все order : %v", err)
 		return
 	}
 
@@ -198,6 +199,6 @@ func (r *Repository) loadToCache() {
 			continue
 		}
 
-		r.cache.Set(uid, order)
+		r.cache.Put(uid, order)
 	}
 }

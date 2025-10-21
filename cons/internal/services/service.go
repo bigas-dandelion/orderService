@@ -20,6 +20,5 @@ func (s *Service) StoreOrder(order *models.Order) error {
 }
 
 func (s *Service) GetOrder(orderUID string) (*models.Order, error) {
-	res, err := s.repo.GetOrder(orderUID)
-	return res, err
+	return s.repo.GetOrder(orderUID)
 }

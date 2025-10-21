@@ -3,29 +3,26 @@ package main
 import (
 	"context"
 	"log"
-	"os"
+
+	"l0/prod/config"
+	"l0/prod/generator"
 
 	"github.com/segmentio/kafka-go"
 )
 
-const (
-	kafkaTopic = "orders"
-	kafkaBroker = "localhost:29092"
-	dataPass = "prod/model.json"
-)
-
 func main() {
+	cfg := config.LoadConfig()
+
 	writer := &kafka.Writer{
-		Addr:     kafka.TCP(kafkaBroker),
-		Topic:    kafkaTopic,
+		Addr:     kafka.TCP(cfg.Broker),
+		Topic:    cfg.Topic,
 		Balancer: &kafka.LeastBytes{},
 	}
-
 	defer writer.Close()
 
-	data, err := os.ReadFile(dataPass)
+	data, err := generator.GenerateData()
 	if err != nil {
-		log.Fatal("Не удалось прочитать файл:", err)
+		log.Fatalf("Ошибка в генерации заказа: %v", err)
 	}
 
 	err = writer.WriteMessages(context.Background(), kafka.Message{

@@ -2,8 +2,9 @@ package handler
 
 import (
 	"encoding/json"
-	"l0/cons/internal/services"
 	"net/http"
+
+	"l0/cons/internal/services"
 )
 
 type HandlerTask struct {
@@ -20,7 +21,7 @@ func (h *HandlerTask) GetOrderHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("order_uid")
 		if id == "" {
-			http.Error(w, "id is required", http.StatusBadRequest)
+			http.Error(w, "Id не должен быть пустой строкой", http.StatusBadRequest)
 			return
 		}
 
@@ -31,7 +32,7 @@ func (h *HandlerTask) GetOrderHandler() http.HandlerFunc {
 		}
 
 		if order == nil {
-			http.Error(w, "order not found", http.StatusNotFound)
+			http.Error(w, "Заказ не найден", http.StatusNotFound)
 			return
 		}
 

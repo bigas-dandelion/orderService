@@ -3,45 +3,44 @@ package consumer
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
+
 	"l0/cons/internal/cache"
 	"l0/cons/internal/models"
 	"l0/cons/internal/repository"
-	"log"
+	"l0/cons/internal/validation"
 
 	"github.com/segmentio/kafka-go"
 )
 
-const (
-	kafkaTopic  = "orders"
-	kafkaBroker = "localhost:29092"
-	kafkaGroup  = "order-service-group"
-)
-
-func Consume(repo *repository.Repository, orderCache *cache.Cache) {
+func Consume(ctx context.Context, broker, topic, group string, repo *repository.Repository, orderCache *cache.Cache) {
 	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:   []string{kafkaBroker},
-		Topic:     kafkaTopic,
-		GroupID:   kafkaGroup,
-		Partition: 0,
-		MinBytes:  10e3,
-		MaxBytes:  10e6,
+		Brokers:  []string{broker},
+		Topic:    topic,
+		GroupID:  group,
+		MinBytes: 10e3,
+		MaxBytes: 10e6,
 	})
+	defer reader.Close()
 
 	for {
-		msg, err := reader.ReadMessage(context.Background())
+		msg, err := reader.ReadMessage(ctx)
 		if err != nil {
+			if errors.Is(err, context.Canceled) {
+				log.Println("Консьюмер кафки остановлен")
+				return
+			}
 			log.Printf("Ошибка при получении сообщения из Kafka: %v", err)
 			continue
 		}
 
-		fmt.Printf("Полученное сообщение: %s\n", string(msg.Value))
-
+		fmt.Printf("\nПолученное сообщение: %s\n\n", msg.Value)
 		saveOrderInCacheAndDB(msg.Value, repo, orderCache)
 
-		err = reader.CommitMessages(context.Background(), msg)
-		if err != nil {
-			log.Printf("Ошибка при подтверждении смещения сообщения: %v", err)
+		if err = reader.CommitMessages(ctx, msg); err != nil {
+			log.Printf("Ошибка при подтверждении смещения: %v", err)
 		}
 	}
 }
@@ -55,12 +54,17 @@ func saveOrderInCacheAndDB(message []byte, repo *repository.Repository, cache *c
 		return
 	}
 
+	if err = validation.Validate(&order); err != nil {
+		log.Printf("Ошибка валидации заказа: %v", err)
+		return
+	}
+
 	err = repo.StoreOrder(&order)
 	if err != nil {
 		log.Printf("Ошибка сохранения заказа %s в бд: %v", order.OrderUID, err)
 		return
 	}
 
-	cache.Set(order.OrderUID, &order)
+	cache.Put(order.OrderUID, &order)
 	log.Printf("Заказ %s обработан и сохранен в бд и кэше.", order.OrderUID)
 }
