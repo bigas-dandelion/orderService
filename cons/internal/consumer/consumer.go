@@ -55,8 +55,8 @@ func saveOrderInCacheAndDB(message []byte, repo *repository.Repository, cache *c
 	}
 
 	if err = validation.Validate(&order); err != nil {
-		log.Printf("Ошибка валидации заказа: %v", err)
-		return
+		log.Printf("Ошибка валидации заказа %s: %v", order.OrderUID, err)
+    	return
 	}
 
 	err = repo.StoreOrder(&order)

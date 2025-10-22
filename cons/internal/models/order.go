@@ -13,7 +13,7 @@ type Order struct {
 	DeliveryService   string   `json:"delivery_service" validate:"required"`
 	ShardKey          string   `json:"shardkey" validate:"required,numeric"`
 	SmID              int      `json:"sm_id" validate:"gte=0"`
-	DateCreated string `json:"date_created" validate:"required,datetime_rfc3339"`
+	DateCreated       string   `json:"date_created" validate:"required,datetime_rfc3339"`
 	OofShard          string   `json:"oof_shard" validate:"required,numeric"`
 }
 
@@ -24,7 +24,7 @@ type Delivery struct {
 	City    string `json:"city" validate:"required"`
 	Address string `json:"address" validate:"required"`
 	Region  string `json:"region" validate:"required"`
-	Email string `json:"email" validate:"email"`
+	Email   string `json:"email" validate:"omitempty,email"`
 }
 
 type Payment struct {
